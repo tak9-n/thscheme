@@ -68,7 +68,7 @@ parseFloat = do integer <- many digit
 parseParent :: Parser LispTypes
 parseParent = do char '('
                  spaces
-                 content <- try parseList <|> parsePair
+                 content <- try parsePair <|> parseList
                  spaces
                  char ')'
                  return content
@@ -92,8 +92,8 @@ parseQuote = do char '\''
                 
 parseExpr :: Parser LispTypes
 parseExpr =  parseString
+  <|> try parseFloat
   <|> parseInteger
-  <|> parseFloat
   <|> parseSymbol
   <|> parseQuote
   <|> parseParent
