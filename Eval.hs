@@ -81,15 +81,14 @@ list_of_values (env,(LispList [])) result = (env,(LispList (reverse result)))
 list_of_values (env,(LispList (hd:tl))) now = case eval (env,hd) of
                                    (env2,exp) -> list_of_values (env2,(LispList tl)) (exp:now)
 
-if_predicate (LispList (pred:_)) = pred
-if_consequent (LispList (_:c:_)) = c
-if_alternative (LispList (_:a:[])) = a
-if_alternative (LispList (_:[])) = LispList []
+if_predicate (LispList (_:pred:_:_:[])) = pred
+if_consequent (LispList (_:_:c:_:[])) = c
+if_alternative (LispList (_:_:_:a:[])) = a
 if_alternative _ = error "illegal if"
 
 eval_if (env,exp) = case eval (env,(if_predicate exp)) of
-                      (_,LispTrue)  -> eval (env,if_consequent exp)
-                      (_,LispFalse) -> eval (env,if_alternative exp)
+                      (env2,LispFalse) -> eval (env2,if_alternative exp)
+                      (env2,_)  -> eval (env2,if_consequent exp)
 
 eval_sequence:: ([Env],LispTypes) -> ([Env],LispTypes)
 eval_sequence (env,(LispList (x:[]))) = (env,x)
