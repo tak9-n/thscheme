@@ -9,19 +9,21 @@ printList (hd:tl) = do printTypes hd
                        printList tl
 
 printTypes :: LispTypes -> IO ()
-printTypes (Symbol str) = putStr str
-printTypes (List lst) = do putStr "("
-                           printList lst
-                           putStr ")"
-printTypes (Pair head tail) = do putStr "("
-                                 printTypes head
-                                 putStr " . "
-                                 printTypes tail
-                                 putStr ")"
-printTypes (Integer num) = putStr $ show num
-printTypes (Float num) = putStr $ show num
-printTypes (String str) = do putStr "\""
-                             putStr str
-                             putStr "\""
-printTypes (Bool True) = putStr "#t"
-printTypes (Bool False) = putStr "#f"
+printTypes (LispSymbol str) = do putStr "'"
+                                 putStr str
+
+printTypes (LispList lst) = do putStr "("
+                               printList lst
+                               putStr ")"
+printTypes (LispPair head tail) = do putStr "("
+                                     printTypes head
+                                     putStr " . "
+                                     printTypes tail
+                                     putStr ")"
+printTypes (LispInteger num) = putStr $ show num
+printTypes (LispFloat num) = putStr $ show num
+printTypes (LispString str) = do putStr "\""
+                                 putStr str
+                                 putStr "\""
+printTypes (LispTrue) = putStr "#t"
+printTypes (LispFalse) = putStr "#f"

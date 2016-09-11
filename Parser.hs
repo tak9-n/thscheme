@@ -19,21 +19,21 @@ parseEscape = do char '\\'
                    'n'  -> '\n'
                    'r'  -> '\r'
                    _    -> escaped
-                 
+
 parseString :: Parser LispTypes
 parseString = do char '"'
                  x <- many ( parseEscape <|> (noneOf "\"") )
                  char '"'
-                 return $ String x
+                 return $ LispString x
 
 parseSymbol :: Parser LispTypes
 parseSymbol = do first <- letter <|> symbolLetter
                  rest <- many (letter <|> digit <|> symbolLetter)
                  let sym = first:rest
                  return $ case sym of
-                   "#t" -> Bool True
-                   "#f" -> Bool False
-                   _    -> Symbol sym
+                   "#t" -> LispTrue
+                   "#f" -> LispFalse
+                   _    -> LispSymbol sym
 
 parseDecimal :: Parser Integer
 parseDecimal = do decimal <- many1 digit
@@ -49,19 +49,19 @@ parseHex = do  char 'x'
 parseOct :: Parser Integer
 parseOct = do char 'o'
               oct <- many (oneOf "012345678")
-              return $ case readOct oct of 
+              return $ case readOct oct of
                 [(a,_)] -> a
                 _ -> 0
 
-               
+
 parseInteger :: Parser LispTypes
-parseInteger = (parseDecimal <|> ( (char '#') >> (parseOct <|> parseHex) )) >>= \x -> (return $ Integer x)
+parseInteger = (parseDecimal <|> ( (char '#') >> (parseOct <|> parseHex) )) >>= \x -> (return $ LispInteger x)
 
 parseFloat :: Parser LispTypes
 parseFloat = do integer <- many digit
                 char '.'
                 decimal <- many1 digit
-                return $ Float $ case (readFloat $ integer ++ "." ++ decimal) of
+                return $ LispFloat $ case (readFloat $ integer ++ "." ++ decimal) of
                   [(a,_)] -> a
                   _ -> 0.0
 
@@ -75,7 +75,7 @@ parseParent = do char '('
 
 parseList :: Parser LispTypes
 parseList = do lst <- (sepBy parseExpr spaces1)
-               return $ List lst
+               return $ LispList lst
 
 parsePair :: Parser LispTypes
 parsePair = do head <- parseExpr
@@ -83,13 +83,13 @@ parsePair = do head <- parseExpr
                char '.'
                spaces1
                tail <- parseExpr
-               return $ Pair head tail
+               return $ LispPair head tail
 
 parseQuote :: Parser LispTypes
 parseQuote = do char '\''
                 p <- parseExpr
-                return $ List [Symbol "QUOTE" , p ]
-                
+                return $ LispList [LispSymbol "QUOTE" , p ]
+
 parseExpr :: Parser LispTypes
 parseExpr =  parseString
   <|> try parseFloat
